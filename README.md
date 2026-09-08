@@ -2,7 +2,7 @@
 
 Config [WezTerm](https://wezterm.org) cho **macOS và Windows**. Một file `wezterm.lua`, cố tình để ngắn — mặc định
 của WezTerm vốn đã hợp lý, mỗi dòng ở đây tồn tại vì mặc định sai với cách tôi làm việc thật:
-phiên Claude Code chạy dài, chữ tiếng Việt, và bộ chọn màu đổi được ngay trong lúc dùng.
+phiên Claude Code chạy dài, chữ tiếng Việt, và màu đổi được ngay trong lúc dùng.
 
 ```
  ~/…/config/wezterm  ·  Dusk-Navy  ·  ⚡ 87%  ·  14:32
@@ -73,16 +73,14 @@ WezTerm theo dõi file config và tự nạp lại khi lưu — **không cần k
 
 ## Phím tắt
 
-| Phím | Tác dụng |
-|---|---|
-| `CMD+SHIFT+T` | Mở bộ chọn scheme (fuzzy, gõ để lọc) |
-| `CMD+OPT+→` / `←` | Bước qua shortlist đã chọn sẵn, áp dụng ngay |
-| `CMD+OPT+SHIFT+→` / `←` | Bước qua **toàn bộ** scheme theo thứ tự alphabet |
-| `CMD+OPT+↑` | Bật/tắt trong suốt, khi cần tương phản tối đa |
-| `CMD+OPT+↓` | Bật/tắt gradient nền |
+| Tác dụng | macOS | Windows |
+|---|---|---|
+| Bật/tắt trong suốt, khi cần tương phản tối đa | `CMD+OPT+↑` | `CTRL+SHIFT+ALT+↑` |
+| Bật/tắt gradient nền | `CMD+OPT+↓` | `CTRL+SHIFT+ALT+↓` |
 
-Tất cả đều dùng phím mũi tên có chủ đích: mũi tên không sinh ký tự, nên một binding trượt cũng
-không làm lọt chữ lạ vào chương trình đang chạy trong pane.
+Chỉ hai phím này, đều là modifier+mũi tên có chủ đích: mũi tên không sinh ký tự, nên một binding
+trượt cũng không làm lọt chữ lạ vào chương trình đang chạy trong pane. Đổi màu thì sửa `theme.lua`,
+không có phím tắt riêng.
 
 ---
 
@@ -91,10 +89,10 @@ không làm lọt chữ lạ vào chương trình đang chạy trong pane.
 | File | Vai trò |
 |---|---|
 | `wezterm.lua` | Toàn bộ config |
-| `theme.lua` | Scheme đang chọn cho sáng/tối + cờ gradient. Do bộ chọn ghi ra, sửa tay cũng được |
+| `theme.lua` | Scheme đang chọn cho sáng/tối + cờ gradient. Sửa tay, lưu là áp dụng ngay |
 | `colortest.sh` | Test màu + thuộc tính chữ của scheme đang chạy |
 
-`theme.lua` tách riêng để bộ chọn ghi đè được mà không đụng vào `wezterm.lua`. WezTerm theo dõi
+`theme.lua` tách riêng để đổi scheme mà không đụng vào `wezterm.lua`. WezTerm theo dõi
 file đó, nên một lần ghi là kích hoạt reload ở **mọi** cửa sổ.
 
 ---
@@ -116,7 +114,7 @@ và độ trong của profile (alpha 0.70) bị bỏ qua, thay bằng opacity/bl
 
 **Sáng: `Everforest Light Medium (Gogh)`** — built-in.
 
-Đổi bằng `CMD+SHIFT+T`, hoặc sửa thẳng `theme.lua`.
+Đổi bằng cách sửa `theme.lua` — lưu file là mọi cửa sổ đang mở đổi theo ngay.
 
 ---
 

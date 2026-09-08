@@ -17,7 +17,6 @@
 -- lưu là mọi cửa sổ đang mở đổi theo ngay, không cần khởi động lại.
 
 local wezterm = require("wezterm")
-local act = wezterm.action
 local config = wezterm.config_builder()
 
 -- ── Nền tảng ──────────────────────────────────────────────────────────────────
@@ -90,7 +89,7 @@ local function read_theme()
   return { dark = FALLBACK.dark, light = FALLBACK.light, gradient = FALLBACK.gradient }
 end
 
--- Watching theme.lua is what makes the picker instant in *every* open window, not just the one
+-- Watching theme.lua is what makes an edit land in *every* open window, not just the one
 -- the key was pressed in: the write triggers a config reload everywhere.
 wezterm.add_to_config_reload_watch_list(THEME_FILE)
 

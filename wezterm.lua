@@ -7,14 +7,14 @@
 -- Reload: WezTerm watches this file and applies changes on save. No restart needed.
 --
 -- Keys added here:
---   CMD+SHIFT+T          pick a colour scheme from all ~1100 built-ins, plus Dusk-Navy (type to filter)
---   CMD+OPT+→ / ←        step through the shortlist below, applied as you go
---   CMD+OPT+SHIFT+→ / ←  step through every built-in scheme, alphabetically
---   CMD+OPT+↑            toggle window transparency off/on when a screen needs full contrast
---   CMD+OPT+↓            toggle the background gradient
+--   CMD+OPT+↑ (CTRL+SHIFT+ALT+↑)   toggle window transparency off/on when a screen needs full contrast
+--   CMD+OPT+↓ (CTRL+SHIFT+ALT+↓)   toggle the background gradient
 --
--- The runtime keys are all CMD+OPT+arrow on purpose: arrows produce no character, so a binding
+-- The runtime keys are all modifier+arrow on purpose: arrows produce no character, so a binding
 -- that fails to match cannot leak a stray letter into whatever is running in the pane.
+--
+-- Đổi màu: sửa thẳng theme.lua (dark = "...", light = "..."). WezTerm theo dõi file đó nên
+-- lưu là mọi cửa sổ đang mở đổi theo ngay, không cần khởi động lại.
 
 local wezterm = require("wezterm")
 local act = wezterm.action
@@ -25,16 +25,14 @@ local config = wezterm.config_builder()
 -- ba biến dưới đây, không rải rác trong file.
 --   IS_MAC  : blur nền, phím CMD, font giao diện SF Pro Text
 --   IS_WIN  : mở thẳng vào WSL, render bằng WebGpu, font giao diện Segoe UI
---   SUPER   : phím bổ trợ chính — CMD trên macOS, CTRL|SHIFT trên Windows/Linux
+--   SUPER_ALT : phím bổ trợ cho 2 phím tắt còn lại — CMD+OPT (macOS) / CTRL+SHIFT+ALT (Windows)
 local IS_MAC = wezterm.target_triple:find("darwin") ~= nil
 local IS_WIN = wezterm.target_triple:find("windows") ~= nil
-local SUPER = IS_MAC and "CMD" or "CTRL|SHIFT"
 local SUPER_ALT = IS_MAC and "CMD|ALT" or "CTRL|SHIFT|ALT"
-local SUPER_ALT_SHIFT = IS_MAC and "CMD|ALT|SHIFT" or "CTRL|SHIFT|ALT"
 
 -- ── Colours ───────────────────────────────────────────────────────────────────
--- The chosen scheme lives in theme.lua, not here, so the picker can rewrite it without touching
--- this file. Light and dark are stored separately: macOS switches appearance and the terminal
+-- The chosen scheme lives in theme.lua, not here, so it can be changed without touching this
+-- file — and so Neovim can read the same file and match. Light and dark are stored separately: macOS switches appearance and the terminal
 -- follows, keeping whatever was picked for each side.
 
 local THEME_FILE = wezterm.config_dir .. "/theme.lua"
@@ -65,59 +63,12 @@ local CUSTOM_SCHEMES = {
   },
 }
 
--- Stepped through with CMD+OPT+arrows, grouped by mood: muted greens and greys first, then the
--- blues, then the warm ones. Every name here was checked against the built-in list.
-local SHORTLIST = {
-  dark = {
-    -- muted, low contrast
-    "Everforest Dark Medium (Gogh)",
-    "Everforest Dark Soft (Gogh)",
-    "Everforest Dark Hard (Gogh)",
-    "Nord (Gogh)",
-    "nordfox",
-    "Kanagawa (Gogh)",
-    "Kanagawa Dragon (Gogh)",
-    -- blues, deepest first
-    "Dusk-Navy",
-    "Ef-Night",
-    "Night Owl (Gogh)",
-    "Nightfly (Gogh)",
-    "Tomorrow Night Blue",
-    "Blazer",
-    "Harmonic16 Dark (base16)",
-    "Cobalt2",
-    "Aardvark Blue",
-    "Overnight Slumber",
-    "Ef-Maris-Dark",
-    "Mirage",
-    "duskfox",
-    "Tokyo Night Storm",
-    -- warm / neutral
-    "rose-pine-moon",
-    "Gruvbox Material (Gogh)",
-    "Catppuccin Mocha",
-    "carbonfox",
-  },
-  light = {
-    "Everforest Light Medium (Gogh)",
-    "Everforest Light Soft (Gogh)",
-    "Nord Light (Gogh)",
-    "dayfox",
-    "rose-pine-dawn",
-    "Catppuccin Latte",
-    "Ayu Light (Gogh)",
-    "Tokyo Night Day",
-    "Solarized Light (Gogh)",
-    "PaperColor Light (base16)",
-  },
-}
-
 local function write_theme(theme)
   local f = io.open(THEME_FILE, "w")
   if not f then
     return
   end
-  f:write("-- Written by the colour picker (CMD+SHIFT+T). Safe to edit by hand.\n")
+  f:write("-- Scheme đang dùng. Sửa tay thoải mái; WezTerm nạp lại ngay khi lưu.\n")
   f:write(string.format(
     "return { dark = %q, light = %q, gradient = %s }\n",
     theme.dark,
@@ -199,84 +150,6 @@ end
 
 local function visuals_for(scheme_name)
   return frame_for(scheme_name), (theme.gradient and gradient_for(scheme_name) or nil)
-end
-
-local function apply_scheme(window, name)
-  local current = read_theme()
-  if is_dark(window:get_appearance()) then
-    current.dark = name
-  else
-    current.light = name
-  end
-  write_theme(current)
-  theme = current
-
-  local overrides = window:get_config_overrides() or {}
-  local frame, gradient = visuals_for(name)
-  overrides.color_scheme = name
-  overrides.window_frame = frame
-  overrides.window_background_gradient = gradient
-  window:set_config_overrides(overrides)
-end
-
-local ALL_SCHEMES
-
-local function all_schemes()
-  if not ALL_SCHEMES then
-    ALL_SCHEMES = {}
-    for name, _ in pairs(CUSTOM_SCHEMES) do
-      ALL_SCHEMES[#ALL_SCHEMES + 1] = name
-    end
-    for name, _ in pairs(wezterm.color.get_builtin_schemes()) do
-      ALL_SCHEMES[#ALL_SCHEMES + 1] = name
-    end
-    table.sort(ALL_SCHEMES, function(a, b)
-      return a:lower() < b:lower()
-    end)
-  end
-  return ALL_SCHEMES
-end
-
-local function step_scheme(window, step, everything)
-  local list
-  if everything then
-    list = all_schemes()
-  else
-    list = is_dark(window:get_appearance()) and SHORTLIST.dark or SHORTLIST.light
-  end
-
-  local current = window:effective_config().color_scheme
-  local at = 0
-  for i, name in ipairs(list) do
-    if name == current then
-      at = i
-      break
-    end
-  end
-  apply_scheme(window, list[((at - 1 + step) % #list) + 1])
-end
-
-local function pick_scheme(window, pane)
-  local choices = {}
-  for _, name in ipairs(all_schemes()) do
-    table.insert(choices, { label = name })
-  end
-
-  window:perform_action(
-    act.InputSelector({
-      title = "Colour scheme",
-      description = "Type to filter, Enter applies and saves, Esc cancels.",
-      fuzzy = true,
-      fuzzy_description = "Scheme: ",
-      choices = choices,
-      action = wezterm.action_callback(function(win, _, _, label)
-        if label then
-          apply_scheme(win, label)
-        end
-      end),
-    }),
-    pane
-  )
 end
 
 local function toggle_gradient(window)
@@ -482,18 +355,7 @@ config.audible_bell = "Disabled"
 config.window_close_confirmation = "AlwaysPrompt"
 
 -- ── Keys ──────────────────────────────────────────────────────────────────────
-local function stepper(step, everything)
-  return wezterm.action_callback(function(window)
-    step_scheme(window, step, everything)
-  end)
-end
-
 config.keys = {
-  { key = "t", mods = IS_MAC and "CMD|SHIFT" or SUPER, action = wezterm.action_callback(pick_scheme) },
-  { key = "RightArrow", mods = SUPER_ALT, action = stepper(1, false) },
-  { key = "LeftArrow", mods = SUPER_ALT, action = stepper(-1, false) },
-  { key = "RightArrow", mods = SUPER_ALT_SHIFT, action = stepper(1, true) },
-  { key = "LeftArrow", mods = SUPER_ALT_SHIFT, action = stepper(-1, true) },
   { key = "DownArrow", mods = SUPER_ALT, action = wezterm.action_callback(toggle_gradient) },
   {
     key = "UpArrow",

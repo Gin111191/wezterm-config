@@ -14,10 +14,8 @@ phiên Claude Code chạy dài, chữ tiếng Việt, và bộ chọn màu đổ
 
 ## Có gì
 
-- **Bộ chọn scheme ngay trong terminal** — `CMD+SHIFT+T` mở danh sách fuzzy ~1100 scheme built-in,
-  gõ để lọc, Enter là áp dụng **và lưu lại**
-- **Sáng/tối tự theo macOS** — mỗi bên nhớ scheme riêng, hệ thống đổi appearance thì terminal đổi theo
-- **Đổi scheme là mọi cửa sổ đang mở đổi theo** — không phải chỉ cửa sổ vừa bấm phím
+- **Scheme khai báo trong `theme.lua`** — sửa tay, lưu là mọi cửa sổ đang mở đổi ngay (WezTerm theo dõi file)
+- **Sáng/tối tự theo hệ điều hành** — mỗi bên nhớ scheme riêng
 - **Gradient nền sinh theo scheme đang chạy** — chọn scheme xanh thì gradient xanh, không hard-code
 - **Titlebar bám màu scheme** — không còn dải xám macOS lệch màu ở trên
 - **Nâng riêng slot ANSI 8** để dòng phụ của agent (tool output, số dòng, comment) đọc được
@@ -27,14 +25,28 @@ phiên Claude Code chạy dài, chữ tiếng Việt, và bộ chọn màu đổ
 
 ---
 
+## Đổi màu
+
+Sửa `theme.lua`:
+
+```lua
+return { dark = "Dusk-Navy", light = "Everforest Light Medium (Gogh)", gradient = true }
+```
+
+Tên scheme lấy từ [danh sách built-in của WezTerm](https://wezterm.org/colorschemes/index.html) (~1100 cái),
+hoặc tự thêm bảng màu vào `CUSTOM_SCHEMES` trong `wezterm.lua` như `Dusk-Navy`.
+
+Lưu file là xong — WezTerm theo dõi `theme.lua` nên mọi cửa sổ đang mở đổi theo ngay.
+Cấu hình Neovim ở [Gin111191/nvim-config](https://github.com/Gin111191/nvim-config) cũng đọc chính file này.
+
 ## Nền tảng
 
 Một file `wezterm.lua` chạy cả hai bên. Khác biệt đi qua 3 biến ở đầu file (`IS_MAC`, `IS_WIN`, `SUPER`):
 
 | | macOS | Windows |
 |---|---|---|
-| Phím bộ chọn scheme | `CMD+SHIFT+T` | `CTRL+SHIFT+T` |
-| Bước qua scheme | `CMD+OPT+←/→` | `CTRL+SHIFT+ALT+←/→` |
+| Bật/tắt gradient | `CMD+OPT+↓` | `CTRL+SHIFT+ALT+↓` |
+| Bật/tắt nền trong | `CMD+OPT+↑` | `CTRL+SHIFT+ALT+↑` |
 | Font giao diện titlebar | SF Pro Text | Segoe UI |
 | Nền mờ | `macos_window_background_blur` | (macOS mới có) |
 | Shell mặc định | mặc định hệ thống | mở thẳng `WSL:Ubuntu` |

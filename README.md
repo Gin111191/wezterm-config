@@ -1,6 +1,6 @@
 # wezterm-config
 
-Config [WezTerm](https://wezterm.org) cho macOS. Một file `wezterm.lua`, cố tình để ngắn — mặc định
+Config [WezTerm](https://wezterm.org) cho **macOS và Windows**. Một file `wezterm.lua`, cố tình để ngắn — mặc định
 của WezTerm vốn đã hợp lý, mỗi dòng ở đây tồn tại vì mặc định sai với cách tôi làm việc thật:
 phiên Claude Code chạy dài, chữ tiếng Việt, và bộ chọn màu đổi được ngay trong lúc dùng.
 
@@ -26,6 +26,21 @@ phiên Claude Code chạy dài, chữ tiếng Việt, và bộ chọn màu đổ
 - `colortest.sh` để soi 16 màu ANSI, thuộc tính chữ, dấu tiếng Việt và icon Nerd Font của scheme hiện tại
 
 ---
+
+## Nền tảng
+
+Một file `wezterm.lua` chạy cả hai bên. Khác biệt đi qua 3 biến ở đầu file (`IS_MAC`, `IS_WIN`, `SUPER`):
+
+| | macOS | Windows |
+|---|---|---|
+| Phím bộ chọn scheme | `CMD+SHIFT+T` | `CTRL+SHIFT+T` |
+| Bước qua scheme | `CMD+OPT+←/→` | `CTRL+SHIFT+ALT+←/→` |
+| Font giao diện titlebar | SF Pro Text | Segoe UI |
+| Nền mờ | `macos_window_background_blur` | (macOS mới có) |
+| Shell mặc định | mặc định hệ thống | mở thẳng `WSL:Ubuntu` |
+| Render | mặc định | `WebGpu`, 144 fps |
+
+Sáng/tối tự theo hệ thống ở cả hai nền tảng.
 
 ## Cài đặt
 

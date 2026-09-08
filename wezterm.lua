@@ -20,6 +20,18 @@ local wezterm = require("wezterm")
 local act = wezterm.action
 local config = wezterm.config_builder()
 
+-- ── Nền tảng ──────────────────────────────────────────────────────────────────
+-- Config này chạy trên cả macOS và Windows. Mọi khác biệt giữa hai bên đều đi qua
+-- ba biến dưới đây, không rải rác trong file.
+--   IS_MAC  : blur nền, phím CMD, font giao diện SF Pro Text
+--   IS_WIN  : mở thẳng vào WSL, render bằng WebGpu, font giao diện Segoe UI
+--   SUPER   : phím bổ trợ chính — CMD trên macOS, CTRL|SHIFT trên Windows/Linux
+local IS_MAC = wezterm.target_triple:find("darwin") ~= nil
+local IS_WIN = wezterm.target_triple:find("windows") ~= nil
+local SUPER = IS_MAC and "CMD" or "CTRL|SHIFT"
+local SUPER_ALT = IS_MAC and "CMD|ALT" or "CTRL|SHIFT|ALT"
+local SUPER_ALT_SHIFT = IS_MAC and "CMD|ALT|SHIFT" or "CTRL|SHIFT|ALT"
+
 -- ── Colours ───────────────────────────────────────────────────────────────────
 -- The chosen scheme lives in theme.lua, not here, so the picker can rewrite it without touching
 -- this file. Light and dark are stored separately: macOS switches appearance and the terminal
@@ -153,7 +165,8 @@ end
 local function frame_for(scheme_name)
   local palette = palette_for(scheme_name)
   return {
-    font = wezterm.font({ family = "SF Pro Text", weight = "Medium" }),
+    -- SF Pro Text chỉ có trên macOS; Windows dùng Segoe UI.
+    font = wezterm.font({ family = IS_MAC and "SF Pro Text" or "Segoe UI", weight = "Medium" }),
     font_size = 12.0,
     active_titlebar_bg = palette and palette.background,
     inactive_titlebar_bg = palette and palette.background,
@@ -334,7 +347,13 @@ end)
 -- ── Text ──────────────────────────────────────────────────────────────────────
 -- WezTerm bundles JetBrains Mono, which covers Vietnamese diacritics properly. Many coding fonts
 -- do not, and a missing glyph is silently substituted — which is how "ế" ends up looking wrong.
-config.font = wezterm.font_with_fallback({ "JetBrains Mono", "Menlo" })
+-- "JetBrainsMono Nerd Font" (bản cài riêng, có icon) đứng trước; "JetBrains Mono"
+-- là bản WezTerm đóng gói sẵn, luôn có mặt; Menlo/Consolas là chốt chặn cuối.
+config.font = wezterm.font_with_fallback({
+  "JetBrainsMono Nerd Font",
+  "JetBrains Mono",
+  IS_MAC and "Menlo" or "Consolas",
+})
 config.font_size = 13.0
 config.line_height = 1.1
 
@@ -362,7 +381,17 @@ config.window_decorations = "RESIZE"
 -- Slightly see-through with the desktop blurred behind it. Kept mild on purpose: any lower and
 -- text edges start to soften. CMD+OPT+↑ turns it off when that matters.
 config.window_background_opacity = 0.94
-config.macos_window_background_blur = 26
+if IS_MAC then
+  config.macos_window_background_blur = 26
+end
+
+if IS_WIN then
+  -- Mở thẳng vào Ubuntu thay vì PowerShell.
+  config.default_domain = "WSL:Ubuntu"
+  -- Render bằng GPU rời.
+  config.front_end = "WebGpu"
+  config.max_fps = 144
+end
 
 -- The fancy tab bar is the native-looking one, and it doubles as the status strip below, so it
 -- stays visible even with a single tab.
@@ -460,15 +489,15 @@ local function stepper(step, everything)
 end
 
 config.keys = {
-  { key = "t", mods = "CMD|SHIFT", action = wezterm.action_callback(pick_scheme) },
-  { key = "RightArrow", mods = "CMD|ALT", action = stepper(1, false) },
-  { key = "LeftArrow", mods = "CMD|ALT", action = stepper(-1, false) },
-  { key = "RightArrow", mods = "CMD|ALT|SHIFT", action = stepper(1, true) },
-  { key = "LeftArrow", mods = "CMD|ALT|SHIFT", action = stepper(-1, true) },
-  { key = "DownArrow", mods = "CMD|ALT", action = wezterm.action_callback(toggle_gradient) },
+  { key = "t", mods = IS_MAC and "CMD|SHIFT" or SUPER, action = wezterm.action_callback(pick_scheme) },
+  { key = "RightArrow", mods = SUPER_ALT, action = stepper(1, false) },
+  { key = "LeftArrow", mods = SUPER_ALT, action = stepper(-1, false) },
+  { key = "RightArrow", mods = SUPER_ALT_SHIFT, action = stepper(1, true) },
+  { key = "LeftArrow", mods = SUPER_ALT_SHIFT, action = stepper(-1, true) },
+  { key = "DownArrow", mods = SUPER_ALT, action = wezterm.action_callback(toggle_gradient) },
   {
     key = "UpArrow",
-    mods = "CMD|ALT",
+    mods = SUPER_ALT,
     action = wezterm.action_callback(function(window)
       local overrides = window:get_config_overrides() or {}
       if overrides.window_background_opacity == 1.0 then

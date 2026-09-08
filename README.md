@@ -134,8 +134,98 @@ Và nó chỉ có tác dụng khi theme của agent là biến thể ANSI — v�
 
 ---
 
+## Nerd Font
+
+**Có cần cài không: không bắt buộc.** WezTerm đóng gói sẵn `Symbols Nerd Font Mono` và tự
+dùng nó làm chốt chặn cuối, nên icon của starship/eza/lf vẫn hiện dù bạn chưa cài font nào.
+Đây là điểm khác biệt với Terminal.app, iTerm2 hay Windows Terminal — ở những terminal đó
+thiếu Nerd Font là prompt ra toàn ô vuông.
+
+Xem chuỗi font thật mà WezTerm đang dùng:
+
+```sh
+wezterm ls-fonts
+```
+
+Nếu chưa cài `JetBrainsMono Nerd Font`, lệnh trên mở đầu bằng cảnh báo — **không phải lỗi**,
+chỉ là báo nó đang rơi xuống fallback:
+
+```
+Unable to load a font specified by your font=wezterm.font('JetBrainsMono Nerd Font', ...)
+configuration. Fallback(s) are being used instead
+```
+
+và chuỗi rơi về: `JetBrains Mono` (WezTerm đóng gói) → `Menlo` → `Noto Color Emoji` →
+`Symbols Nerd Font Mono` (cũng đóng gói). Chữ và icon đều hiện, chỉ là icon lấy từ font
+symbols rời chứ không phải cùng một font với chữ.
+
+**Cài để làm gì.** Một font duy nhất lo cả chữ lẫn icon thì bề ngang glyph đều nhau hơn,
+icon không lệch baseline so với chữ bên cạnh. Cài xong không phải sửa gì —
+`JetBrainsMono Nerd Font` đã nằm đầu danh sách fallback trong `wezterm.lua`.
+
+**macOS**
+
+```sh
+brew install --cask font-jetbrains-mono-nerd-font
+```
+
+**Linux**
+
+```sh
+mkdir -p ~/.local/share/fonts
+curl -fLo /tmp/JetBrainsMono.zip \
+  https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
+unzip -o /tmp/JetBrainsMono.zip -d ~/.local/share/fonts/JetBrainsMono
+fc-cache -f
+fc-list | grep -i "JetBrainsMono Nerd Font" | head -3   # có dòng ra là xong
+```
+
+**Windows (và WSL)**
+
+Tải `JetBrainsMono.zip` từ [nerdfonts.com](https://www.nerdfonts.com/font-downloads), giải nén,
+bôi đen toàn bộ file `.ttf` → chuột phải → **Install for all users**.
+
+Với WSL, font phải cài bên **Windows** chứ không phải bên Linux: Windows mới là bên vẽ chữ,
+Linux chỉ gửi ký tự sang.
+
+Cài xong mở lại WezTerm rồi chạy `wezterm ls-fonts` — cảnh báo biến mất và
+`JetBrainsMono Nerd Font` đứng đầu chuỗi. Không cần sửa `wezterm.lua`.
+
+Muốn font khác thì đổi tên trong `config.font_with_fallback` ở `wezterm.lua`; giữ
+`JetBrains Mono` ở vị trí thứ hai vì nó luôn có mặt và phủ đủ dấu tiếng Việt.
+
+---
+
+## Ghi chú: app để theme sáng trên nền tối
+
+Triệu chứng: mở một tool chạy trong terminal (Claude Code, một TUI bất kỳ), chữ và nền
+chìm vào nhau, gần như không đọc được — trong khi shell bình thường vẫn rõ.
+
+Nguyên nhân không nằm ở WezTerm. Scheme mặc định `Dusk-Navy` có nền `#1d2837`, tối. Nếu app
+đó đang để theme **sáng**, nó vẽ chữ màu tối vì tưởng mình đang nằm trên nền trắng. Chữ tối
+trên nền tối thì chìm.
+
+Với Claude Code, kiểm tra và sửa:
+
+```sh
+grep '"theme"' ~/.claude/settings.json     # "light" trên nền tối là sai
+defaults read -g AppleInterfaceStyle       # "Dark" = macOS đang tối
+```
+
+Sửa nhanh nhất là gõ `/config` trong Claude Code rồi chọn theme tối, khỏi đụng file.
+
+**Cái bẫy còn lại:** `wezterm.lua` tự đổi scheme theo appearance của hệ điều hành (hàm
+`scheme_for`), còn theme của Claude Code là **cố định**. Lật macOS sang Light mode thì
+WezTerm chuyển sang `Everforest Light Medium` còn Claude Code vẫn tối — chìm ngược lại.
+Đổi hệ điều hành sáng/tối thì nhớ đổi cả bên kia.
+
+Chuyện này khác với mục *chữ mờ của agent* ở trên: ở đó **toàn bộ** giao diện vẫn đọc được,
+chỉ riêng dòng phụ vẽ bằng ANSI slot 8 là mờ.
+
+---
+
 ## Yêu cầu
 
 - macOS (config dùng `macos_window_background_blur` và appearance của hệ thống)
 - WezTerm — JetBrains Mono đã đóng gói sẵn bên trong, không cần cài thêm
-- Nerd Font là tuỳ chọn, chỉ để phần 6 của `colortest.sh` hiện icon
+- Nerd Font là tuỳ chọn — WezTerm đóng gói sẵn `Symbols Nerd Font Mono`. Xem mục *Nerd Font*

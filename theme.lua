@@ -1,2 +1,2 @@
--- Scheme đang dùng. Sửa tay thoải mái; WezTerm nạp lại ngay khi lưu.
+-- The scheme in use. Edit it by hand freely; WezTerm reloads the moment it is saved.
 return { dark = "Dusk-Navy", light = "Everforest Light Medium (Gogh)", gradient = true }

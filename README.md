@@ -1,167 +1,168 @@
 # wezterm-config
 
-Config [WezTerm](https://wezterm.org) cho **macOS và Windows**. Một file `wezterm.lua`, cố tình để ngắn — mặc định
-của WezTerm vốn đã hợp lý, mỗi dòng ở đây tồn tại vì mặc định sai với cách tôi làm việc thật:
-phiên Claude Code chạy dài, chữ tiếng Việt, và màu đổi được ngay trong lúc dùng.
+A [WezTerm](https://wezterm.org) config for **macOS and Windows**. One `wezterm.lua`, deliberately short — WezTerm's
+defaults are already sensible, and every line here exists because the default was wrong for how I actually work:
+long Claude Code sessions, Vietnamese text, and colours that can be changed while the terminal is running.
 
 ```
  ~/…/config/wezterm  ·  Dusk-Navy  ·  ⚡ 87%  ·  14:32
  └────────────────┘    └────────┘    └────┘    └───┘
-  thư mục hiện tại      scheme        pin       giờ
+  current folder        scheme       battery   clock
 ```
 
 ---
 
-## Có gì
+## What it does
 
-- **Scheme khai báo trong `theme.lua`** — sửa tay, lưu là mọi cửa sổ đang mở đổi ngay (WezTerm theo dõi file)
-- **Sáng/tối tự theo hệ điều hành** — mỗi bên nhớ scheme riêng
-- **Gradient nền sinh theo scheme đang chạy** — chọn scheme xanh thì gradient xanh, không hard-code
-- **Titlebar bám màu scheme** — không còn dải xám macOS lệch màu ở trên
-- **Nâng riêng slot ANSI 8** để dòng phụ của agent (tool output, số dòng, comment) đọc được
-- **JetBrains Mono** — phủ đủ dấu tiếng Việt, không bị thay glyph thầm lặng
-- **Scrollback 100.000 dòng** — một task Claude Code in ra nhiều hơn mặc định 3.500 dòng
-- `colortest.sh` để soi 16 màu ANSI, thuộc tính chữ, dấu tiếng Việt và icon Nerd Font của scheme hiện tại
+- **The scheme is declared in `theme.lua`** — edit it by hand, and saving changes every open window at once (WezTerm watches the file)
+- **Light/dark follows the operating system** — each side remembers its own scheme
+- **The background gradient is derived from the running scheme** — pick a blue scheme and the gradient is blue, nothing hard-coded
+- **The titlebar takes the scheme's colour** — no more mismatched grey macOS strip on top
+- **ANSI slot 8 is lifted on its own** so an agent's secondary rows (tool output, line numbers, comments) stay readable
+- **JetBrains Mono** — covers Vietnamese diacritics properly, with no silent glyph substitution
+- **100,000 lines of scrollback** — one Claude Code task prints more than the 3,500-line default
+- `colortest.sh` shows the current scheme's 16 ANSI colours, text attributes, Vietnamese diacritics and Nerd Font icons
 
 ---
 
-## Đổi màu
+## Changing colours
 
-Sửa `theme.lua`:
+Edit `theme.lua`:
 
 ```lua
 return { dark = "Dusk-Navy", light = "Everforest Light Medium (Gogh)", gradient = true }
 ```
 
-Tên scheme lấy từ [danh sách built-in của WezTerm](https://wezterm.org/colorschemes/index.html) (~1100 cái),
-hoặc tự thêm bảng màu vào `CUSTOM_SCHEMES` trong `wezterm.lua` như `Dusk-Navy`.
+Scheme names come from [WezTerm's built-in list](https://wezterm.org/colorschemes/index.html) (~1100 of them),
+or add your own palette to `CUSTOM_SCHEMES` in `wezterm.lua`, the way `Dusk-Navy` is added.
 
-Lưu file là xong — WezTerm theo dõi `theme.lua` nên mọi cửa sổ đang mở đổi theo ngay.
-Cấu hình Neovim ở [Gin111191/nvim-config](https://github.com/Gin111191/nvim-config) cũng đọc chính file này.
+Saving the file is all it takes — WezTerm watches `theme.lua`, so every open window follows immediately.
+The Neovim config at [Gin111191/nvim-config](https://github.com/Gin111191/nvim-config) reads this same file.
 
-## Nền tảng
+## Platforms
 
-Một file `wezterm.lua` chạy cả hai bên. Khác biệt đi qua 3 biến ở đầu file (`IS_MAC`, `IS_WIN`, `SUPER`):
+One `wezterm.lua` runs on both. The differences go through 3 variables at the top of the file (`IS_MAC`, `IS_WIN`, `SUPER`):
 
 | | macOS | Windows |
 |---|---|---|
-| Bật/tắt gradient | `CMD+OPT+↓` | `CTRL+SHIFT+ALT+↓` |
-| Bật/tắt nền trong | `CMD+OPT+↑` | `CTRL+SHIFT+ALT+↑` |
-| Font giao diện titlebar | SF Pro Text | Segoe UI |
-| Nền mờ | `macos_window_background_blur` | (macOS mới có) |
-| Shell mặc định | mặc định hệ thống | mở thẳng `WSL:Ubuntu` |
-| Render | mặc định | `WebGpu`, 144 fps |
+| Toggle the gradient | `CMD+OPT+↓` | `CTRL+SHIFT+ALT+↓` |
+| Toggle transparency | `CMD+OPT+↑` | `CTRL+SHIFT+ALT+↑` |
+| Titlebar UI font | SF Pro Text | Segoe UI |
+| Background blur | `macos_window_background_blur` | (macOS only) |
+| Default shell | the system default | opens straight into `WSL:Ubuntu` |
+| Rendering | the default | `WebGpu`, 144 fps |
 
-Sáng/tối tự theo hệ thống ở cả hai nền tảng.
+Light/dark follows the system on both platforms.
 
-## Cài đặt
+## Install
 
 ```sh
 git clone https://github.com/Gin111191/wezterm-config ~/.config/wezterm
 ```
 
-Nếu `~/.config/wezterm` đã có sẵn thì sao lưu trước:
+If `~/.config/wezterm` already exists, back it up first:
 
 ```sh
 mv ~/.config/wezterm ~/.config/wezterm.bak.$(date +%s)
 git clone https://github.com/Gin111191/wezterm-config ~/.config/wezterm
 ```
 
-WezTerm theo dõi file config và tự nạp lại khi lưu — **không cần khởi động lại**.
+WezTerm watches the config file and reloads it on save — **no restart needed**.
 
 ---
 
-## Phím tắt
+## Keys
 
-| Tác dụng | macOS | Windows |
+| What it does | macOS | Windows |
 |---|---|---|
-| Bật/tắt trong suốt, khi cần tương phản tối đa | `CMD+OPT+↑` | `CTRL+SHIFT+ALT+↑` |
-| Bật/tắt gradient nền | `CMD+OPT+↓` | `CTRL+SHIFT+ALT+↓` |
+| Toggle transparency, when you need maximum contrast | `CMD+OPT+↑` | `CTRL+SHIFT+ALT+↑` |
+| Toggle the background gradient | `CMD+OPT+↓` | `CTRL+SHIFT+ALT+↓` |
 
-Chỉ hai phím này, đều là modifier+mũi tên có chủ đích: mũi tên không sinh ký tự, nên một binding
-trượt cũng không làm lọt chữ lạ vào chương trình đang chạy trong pane. Đổi màu thì sửa `theme.lua`,
-không có phím tắt riêng.
+Only these two, and both are modifier+arrow on purpose: an arrow produces no character, so a binding that
+fails to match cannot leak a stray letter into whatever is running in the pane. Colours are changed by editing
+`theme.lua`; there is no key for that.
 
 ---
 
-## Cấu trúc
+## Layout
 
-| File | Vai trò |
+| File | Role |
 |---|---|
-| `wezterm.lua` | Toàn bộ config |
-| `theme.lua` | Scheme đang chọn cho sáng/tối + cờ gradient. Sửa tay, lưu là áp dụng ngay |
-| `colortest.sh` | Test màu + thuộc tính chữ của scheme đang chạy |
+| `wezterm.lua` | The whole config |
+| `theme.lua` | The chosen light/dark scheme + the gradient flag. Edit by hand, saving applies it at once |
+| `colortest.sh` | Colour + text-attribute test for the running scheme |
 
-`theme.lua` tách riêng để đổi scheme mà không đụng vào `wezterm.lua`. WezTerm theo dõi
-file đó, nên một lần ghi là kích hoạt reload ở **mọi** cửa sổ.
+`theme.lua` is kept separate so the scheme can change without touching `wezterm.lua`. WezTerm watches that
+file, so one write triggers a reload in **every** window.
 
 ---
 
-## Scheme mặc định
+## The default schemes
 
-**Tối: `Dusk-Navy`** — scheme tự viết, port từ một profile Terminal.app. Mười sáu màu ANSI,
-foreground, con trỏ và vùng chọn giữ nguyên giá trị sRGB của profile gốc.
+**Dark: `Dusk-Navy`** — a hand-written scheme, ported from a Terminal.app profile. The sixteen ANSI colours,
+the foreground, the cursor and the selection keep the original profile's own sRGB values.
 
-Hai thứ cố tình **không** lấy theo profile: nền gốc là `#000B10` (gần như đen), ở đây giữ `#1d2837`;
-và độ trong của profile (alpha 0.70) bị bỏ qua, thay bằng opacity/blur/gradient đặt trong config.
+Two things are deliberately **not** taken from the profile: its background was `#000B10` (all but black), and
+this one keeps `#1d2837`; and the profile's own transparency (0.70 alpha) is ignored in favour of the
+opacity/blur/gradient set in the config.
 
 | | |
 |---|---|
-| Nền | `#1d2837` |
-| Chữ | `#EDEEF7` |
-| Con trỏ | `#A9AFC6` |
-| Vùng chọn | `#3D4A6B` |
+| Background | `#1d2837` |
+| Text | `#EDEEF7` |
+| Cursor | `#A9AFC6` |
+| Selection | `#3D4A6B` |
 
-**Sáng: `Everforest Light Medium (Gogh)`** — built-in.
+**Light: `Everforest Light Medium (Gogh)`** — built in.
 
-Đổi bằng cách sửa `theme.lua` — lưu file là mọi cửa sổ đang mở đổi theo ngay.
+Change either by editing `theme.lua` — saving the file changes every open window at once.
 
 ---
 
-## Ghi chú: chữ mờ của agent
+## Note: an agent's dim text
 
-Mọi agent chạy trong terminal đều vẽ dòng phụ — tóm tắt tool, số dòng, `+59 lines`, comment — bằng
-ANSI slot 8, "bright black". Phần lớn scheme để slot đó lệch vài phần trăm so với nền: đẹp trong ảnh
-chụp, không đọc nổi khi dùng thật. Config này **chỉ** nâng slot 8; mười lăm màu còn lại giữ nguyên
-đúng như tác giả scheme đã chọn.
+Every agent running in a terminal paints its secondary rows — tool summaries, line numbers, `+59 lines`,
+comments — in ANSI slot 8, "bright black". Most schemes park that slot a few percent away from the background:
+pretty in a screenshot, unreadable in real use. This config lifts **only** slot 8; the other fifteen colours
+stay exactly as the scheme's author chose them.
 
-`foreground_text_hsb` **không** giải quyết được chuyện này. Đã thử (brightness 1.35, rồi 2.0), config
-có reload thật — kiểm chứng bằng một phép thử đổi font-size — mà các dòng mờ không nhúc nhích. Nâng
-slot trong palette mới ăn.
+`foreground_text_hsb` does **not** solve this. It was tried (brightness 1.35, then 2.0), the config genuinely
+did reload — proved with a font-size probe — and the dim rows did not move at all. Lifting the palette slot is
+what works.
 
-Và nó chỉ có tác dụng khi theme của agent là biến thể ANSI — ví dụ `"theme": "dark-ansi"` trong
-`~/.claude/settings.json`. Các theme truecolor đi vòng qua palette này.
+And it only works while the agent's own theme is an ANSI variant — for instance `"theme": "dark-ansi"` in
+`~/.claude/settings.json`. The truecolor themes bypass this palette entirely.
 
 ---
 
 ## Nerd Font
 
-**Có cần cài không: không bắt buộc.** WezTerm đóng gói sẵn `Symbols Nerd Font Mono` và tự
-dùng nó làm chốt chặn cuối, nên icon của starship/eza/lf vẫn hiện dù bạn chưa cài font nào.
-Đây là điểm khác biệt với Terminal.app, iTerm2 hay Windows Terminal — ở những terminal đó
-thiếu Nerd Font là prompt ra toàn ô vuông.
+**Do you have to install one: no.** WezTerm ships `Symbols Nerd Font Mono` and uses it as the last fallback by
+itself, so the starship/eza/lf icons still show up even if you have installed no font at all.
+This is where it differs from Terminal.app, iTerm2 or Windows Terminal — on those, a missing Nerd Font means a
+prompt full of empty boxes.
 
-Xem chuỗi font thật mà WezTerm đang dùng:
+To see the real font chain WezTerm is using:
 
 ```sh
 wezterm ls-fonts
 ```
 
-Nếu chưa cài `JetBrainsMono Nerd Font`, lệnh trên mở đầu bằng cảnh báo — **không phải lỗi**,
-chỉ là báo nó đang rơi xuống fallback:
+If `JetBrainsMono Nerd Font` is not installed, that command opens with a warning — **not an error**,
+just a note that it is falling back:
 
 ```
 Unable to load a font specified by your font=wezterm.font('JetBrainsMono Nerd Font', ...)
 configuration. Fallback(s) are being used instead
 ```
 
-và chuỗi rơi về: `JetBrains Mono` (WezTerm đóng gói) → `Menlo` → `Noto Color Emoji` →
-`Symbols Nerd Font Mono` (cũng đóng gói). Chữ và icon đều hiện, chỉ là icon lấy từ font
-symbols rời chứ không phải cùng một font với chữ.
+and the chain falls back to: `JetBrains Mono` (shipped with WezTerm) → `Menlo` → `Noto Color Emoji` →
+`Symbols Nerd Font Mono` (also shipped). Both text and icons show up; the icons just come from a separate
+symbols font rather than the same font as the text.
 
-**Cài để làm gì.** Một font duy nhất lo cả chữ lẫn icon thì bề ngang glyph đều nhau hơn,
-icon không lệch baseline so với chữ bên cạnh. Cài xong không phải sửa gì —
-`JetBrainsMono Nerd Font` đã nằm đầu danh sách fallback trong `wezterm.lua`.
+**Why install it anyway.** With one font handling both text and icons, glyph widths are more even and the icons
+do not sit off the baseline next to the text. Nothing needs changing after installing —
+`JetBrainsMono Nerd Font` is already first in the fallback list in `wezterm.lua`.
 
 **macOS**
 
@@ -177,55 +178,55 @@ curl -fLo /tmp/JetBrainsMono.zip \
   https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
 unzip -o /tmp/JetBrainsMono.zip -d ~/.local/share/fonts/JetBrainsMono
 fc-cache -f
-fc-list | grep -i "JetBrainsMono Nerd Font" | head -3   # có dòng ra là xong
+fc-list | grep -i "JetBrainsMono Nerd Font" | head -3   # any output means it worked
 ```
 
-**Windows (và WSL)**
+**Windows (and WSL)**
 
-Tải `JetBrainsMono.zip` từ [nerdfonts.com](https://www.nerdfonts.com/font-downloads), giải nén,
-bôi đen toàn bộ file `.ttf` → chuột phải → **Install for all users**.
+Download `JetBrainsMono.zip` from [nerdfonts.com](https://www.nerdfonts.com/font-downloads), unzip it,
+select all the `.ttf` files → right click → **Install for all users**.
 
-Với WSL, font phải cài bên **Windows** chứ không phải bên Linux: Windows mới là bên vẽ chữ,
-Linux chỉ gửi ký tự sang.
+On WSL the font has to be installed on the **Windows** side, not the Linux side: Windows is what draws the
+text, Linux only sends the characters across.
 
-Cài xong mở lại WezTerm rồi chạy `wezterm ls-fonts` — cảnh báo biến mất và
-`JetBrainsMono Nerd Font` đứng đầu chuỗi. Không cần sửa `wezterm.lua`.
+Once installed, reopen WezTerm and run `wezterm ls-fonts` — the warning is gone and
+`JetBrainsMono Nerd Font` is at the head of the chain. No edit to `wezterm.lua` is needed.
 
-Muốn font khác thì đổi tên trong `config.font_with_fallback` ở `wezterm.lua`; giữ
-`JetBrains Mono` ở vị trí thứ hai vì nó luôn có mặt và phủ đủ dấu tiếng Việt.
+For a different font, change the name in `config.font_with_fallback` in `wezterm.lua`; keep
+`JetBrains Mono` in second place, because it is always present and covers Vietnamese diacritics fully.
 
 ---
 
-## Ghi chú: app để theme sáng trên nền tối
+## Note: an app on a light theme over a dark background
 
-Triệu chứng: mở một tool chạy trong terminal (Claude Code, một TUI bất kỳ), chữ và nền
-chìm vào nhau, gần như không đọc được — trong khi shell bình thường vẫn rõ.
+The symptom: you open a tool that runs in the terminal (Claude Code, any TUI), and the text and the background
+sink into each other, almost unreadable — while the ordinary shell is still perfectly clear.
 
-Nguyên nhân không nằm ở WezTerm. Scheme mặc định `Dusk-Navy` có nền `#1d2837`, tối. Nếu app
-đó đang để theme **sáng**, nó vẽ chữ màu tối vì tưởng mình đang nằm trên nền trắng. Chữ tối
-trên nền tối thì chìm.
+The cause is not WezTerm. The default `Dusk-Navy` scheme has a dark background, `#1d2837`. If that app is set
+to a **light** theme, it paints dark text because it believes it is sitting on white. Dark text on a dark
+background disappears.
 
-Với Claude Code, kiểm tra và sửa:
+For Claude Code, check and fix it with:
 
 ```sh
-grep '"theme"' ~/.claude/settings.json     # "light" trên nền tối là sai
-defaults read -g AppleInterfaceStyle       # "Dark" = macOS đang tối
+grep '"theme"' ~/.claude/settings.json     # "light" on a dark background is wrong
+defaults read -g AppleInterfaceStyle       # "Dark" = macOS is in dark mode
 ```
 
-Sửa nhanh nhất là gõ `/config` trong Claude Code rồi chọn theme tối, khỏi đụng file.
+The quickest fix is to type `/config` in Claude Code and pick a dark theme, without touching any file.
 
-**Cái bẫy còn lại:** `wezterm.lua` tự đổi scheme theo appearance của hệ điều hành (hàm
-`scheme_for`), còn theme của Claude Code là **cố định**. Lật macOS sang Light mode thì
-WezTerm chuyển sang `Everforest Light Medium` còn Claude Code vẫn tối — chìm ngược lại.
-Đổi hệ điều hành sáng/tối thì nhớ đổi cả bên kia.
+**The remaining trap:** `wezterm.lua` changes scheme automatically with the operating system's appearance (the
+`scheme_for` function), while Claude Code's theme is **fixed**. Flip macOS to Light mode and WezTerm switches to
+`Everforest Light Medium` while Claude Code stays dark — sinking the other way round.
+When you switch the OS between light and dark, remember to switch the other side too.
 
-Chuyện này khác với mục *chữ mờ của agent* ở trên: ở đó **toàn bộ** giao diện vẫn đọc được,
-chỉ riêng dòng phụ vẽ bằng ANSI slot 8 là mờ.
+This is a different problem from *an agent's dim text* above: there, **all** of the interface is still readable
+and only the secondary rows painted in ANSI slot 8 are dim.
 
 ---
 
-## Yêu cầu
+## Requirements
 
-- macOS (config dùng `macos_window_background_blur` và appearance của hệ thống)
-- WezTerm — JetBrains Mono đã đóng gói sẵn bên trong, không cần cài thêm
-- Nerd Font là tuỳ chọn — WezTerm đóng gói sẵn `Symbols Nerd Font Mono`. Xem mục *Nerd Font*
+- macOS (the config uses `macos_window_background_blur` and the system appearance)
+- WezTerm — JetBrains Mono is bundled inside it, nothing extra to install
+- A Nerd Font is optional — WezTerm ships `Symbols Nerd Font Mono`. See the *Nerd Font* section

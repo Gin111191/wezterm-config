@@ -13,18 +13,18 @@
 -- The runtime keys are all modifier+arrow on purpose: arrows produce no character, so a binding
 -- that fails to match cannot leak a stray letter into whatever is running in the pane.
 --
--- Đổi màu: sửa thẳng theme.lua (dark = "...", light = "..."). WezTerm theo dõi file đó nên
--- lưu là mọi cửa sổ đang mở đổi theo ngay, không cần khởi động lại.
+-- Changing colours: edit theme.lua directly (dark = "...", light = "..."). WezTerm watches that
+-- file, so saving it changes every open window at once — no restart needed.
 
 local wezterm = require("wezterm")
 local config = wezterm.config_builder()
 
--- ── Nền tảng ──────────────────────────────────────────────────────────────────
--- Config này chạy trên cả macOS và Windows. Mọi khác biệt giữa hai bên đều đi qua
--- ba biến dưới đây, không rải rác trong file.
---   IS_MAC  : blur nền, phím CMD, font giao diện SF Pro Text
---   IS_WIN  : mở thẳng vào WSL, render bằng WebGpu, font giao diện Segoe UI
---   SUPER_ALT : phím bổ trợ cho 2 phím tắt còn lại — CMD+OPT (macOS) / CTRL+SHIFT+ALT (Windows)
+-- ── Platform ──────────────────────────────────────────────────────────────────
+-- This config runs on both macOS and Windows. Every difference between the two goes
+-- through the three variables below, rather than being scattered through the file.
+--   IS_MAC  : background blur, CMD key, SF Pro Text as the UI font
+--   IS_WIN  : opens straight into WSL, renders with WebGpu, Segoe UI as the UI font
+--   SUPER_ALT : the modifier for the two remaining shortcuts — CMD+OPT (macOS) / CTRL+SHIFT+ALT (Windows)
 local IS_MAC = wezterm.target_triple:find("darwin") ~= nil
 local IS_WIN = wezterm.target_triple:find("windows") ~= nil
 local SUPER_ALT = IS_MAC and "CMD|ALT" or "CTRL|SHIFT|ALT"
@@ -67,7 +67,7 @@ local function write_theme(theme)
   if not f then
     return
   end
-  f:write("-- Scheme đang dùng. Sửa tay thoải mái; WezTerm nạp lại ngay khi lưu.\n")
+  f:write("-- The scheme in use. Edit it by hand freely; WezTerm reloads the moment it is saved.\n")
   f:write(string.format(
     "return { dark = %q, light = %q, gradient = %s }\n",
     theme.dark,
@@ -115,7 +115,7 @@ end
 local function frame_for(scheme_name)
   local palette = palette_for(scheme_name)
   return {
-    -- SF Pro Text chỉ có trên macOS; Windows dùng Segoe UI.
+    -- SF Pro Text only exists on macOS; Windows uses Segoe UI.
     font = wezterm.font({ family = IS_MAC and "SF Pro Text" or "Segoe UI", weight = "Medium" }),
     font_size = 12.0,
     active_titlebar_bg = palette and palette.background,
@@ -219,8 +219,8 @@ end)
 -- ── Text ──────────────────────────────────────────────────────────────────────
 -- WezTerm bundles JetBrains Mono, which covers Vietnamese diacritics properly. Many coding fonts
 -- do not, and a missing glyph is silently substituted — which is how "ế" ends up looking wrong.
--- "JetBrainsMono Nerd Font" (bản cài riêng, có icon) đứng trước; "JetBrains Mono"
--- là bản WezTerm đóng gói sẵn, luôn có mặt; Menlo/Consolas là chốt chặn cuối.
+-- "JetBrainsMono Nerd Font" (installed separately, carries the icons) comes first; "JetBrains
+-- Mono" is the copy WezTerm ships and is always present; Menlo/Consolas are the last resort.
 config.font = wezterm.font_with_fallback({
   "JetBrainsMono Nerd Font",
   "JetBrains Mono",
@@ -258,9 +258,9 @@ if IS_MAC then
 end
 
 if IS_WIN then
-  -- Mở thẳng vào Ubuntu thay vì PowerShell.
+  -- Open straight into Ubuntu instead of PowerShell.
   config.default_domain = "WSL:Ubuntu"
-  -- Render bằng GPU rời.
+  -- Render on the discrete GPU.
   config.front_end = "WebGpu"
   config.max_fps = 144
 end
